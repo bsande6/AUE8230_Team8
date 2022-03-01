@@ -11,6 +11,8 @@ class WallFollowing():
         self.safe_side_distance = 0.7
         self.left_scan_distance = float('inf')
         self.right_scan_distance = float('inf')
+        self.front_left_scan_distance = float('inf')
+        self.front_right_scan_distance = float('inf')
         self.velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.scan_subscriber = rospy.Subscriber('/scan', LaserScan, self.scan_callback)
         self.min_distance = 1.0
@@ -24,7 +26,17 @@ class WallFollowing():
         
         while not rospy.is_shutdown():
             if self.front_scan_distance > self.min_distance:
-                if self.left_scan_distance < self.safe_side_distance and self.right_scan_distance > self.safe_side_distance:
+                # if self.left_scan_distance < self.safe_side_distance and self.right_scan_distance > self.safe_side_distance:
+                #     self.angle_right()
+                # elif self.right_scan_distance < self.safe_side_distance and self.left_scan_distance > self.safe_side_distance:
+                #     self.angle_left()
+                # else:
+                #     self.go_forward()
+                if self.front_left_scan_distance < self.min_distance and front_right_scan_distance > self.min_distance:
+                    self.turn_right()
+                elif self.front_right_scan_distance < self.min_distance and front_left_scan_distance > self.min_distance:
+                    self.turn_left()
+                elif self.left_scan_distance < self.safe_side_distance and self.right_scan_distance > self.safe_side_distance:
                     self.angle_right()
                 elif self.right_scan_distance < self.safe_side_distance and self.left_scan_distance > self.safe_side_distance:
                     self.angle_left()
@@ -101,6 +113,8 @@ class WallFollowing():
         self.right_scan_distance = self.find_right_side(msg.ranges)
         self.left_scan_distance = self.find_left_side(msg.ranges)
         self.front_scan_distance = msg.ranges[0]
+        self.front_left_scan = msg.ranges[10]
+        self.front_right_scan = msg.ranges[350]
         #self.front_scan = self.find_front(msg.ranges)
         # self.left_scan = self.find_left_side(msg.ranges)
         # self.right_scan = self.find_right_side(msg.ranges)
